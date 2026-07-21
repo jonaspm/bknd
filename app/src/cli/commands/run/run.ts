@@ -16,6 +16,7 @@ import {
 } from "./platform";
 import { createRuntimeApp, makeConfig } from "bknd/adapter";
 import { colorizeConsole, isBun } from "bknd/utils";
+import { createJiti } from "jiti";
 import { withConfigOptions, type WithConfigOptions } from "cli/utils/options";
 
 const env_files = [".env", ".dev.vars"];
@@ -100,7 +101,8 @@ export async function makeAppFromEnv(options: Partial<RunOptions> = {}) {
    } else if (configFilePath) {
       console.info("Using config from", c.cyan(configFilePath));
       try {
-         const config = (await import(configFilePath).then((m) => m.default)) as CliBkndConfig;
+         const jiti = createJiti(path.dirname(configFilePath) + "/", { tsconfigPaths: true });
+         const config = (await jiti.import(configFilePath).then((m: any) => m.default)) as CliBkndConfig;
          app = await makeConfigApp(config, options.server);
       } catch (e) {
          console.error("Failed to load config:", e);
